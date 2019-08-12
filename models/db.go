@@ -7,7 +7,7 @@ import (
 
 type Datastore interface {
 	AllQuotes() ([]*Quote, error)
-	AddQuote(Message string, Sender string, SenderFirstName string, SenderLastName string) error
+	AddQuote(Message string, Sender string, SenderFirstName string, SenderLastName string, SenderID int) error
 	GetQuote(ID string) (*Quote, error)
 	CountQuotes() int
 }

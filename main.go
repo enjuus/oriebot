@@ -34,7 +34,7 @@ func main() {
 
 	b.Handle("/quote", func(m *tb.Message) {
 		if m.ReplyTo != nil {
-			err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName)
+			err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName, m.ReplyTo.Sender.ID)
 			if err != nil {
 				log.Panic(err)
 			}

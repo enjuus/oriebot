@@ -53,13 +53,13 @@ func (db *DB) GetQuote(ID string) (*Quote, error) {
 	return qt, nil
 }
 
-func (db *DB) AddQuote(Message string, Sender string, SenderFirstName string, SenderLastName string) error {
-	stmt, err := db.Prepare("INSERT INTO quotes (Message, Sender, SenderFirstName, SenderLastName) values (?, ?, ?, ?)")
+func (db *DB) AddQuote(Message string, Sender string, SenderFirstName string, SenderLastName string, SenderID int) error {
+	stmt, err := db.Prepare("INSERT INTO quotes (Message, Sender, SenderFirstName, SenderLastName, SenderID) values (?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(Message, Sender, SenderFirstName, SenderLastName)
+	_, err = stmt.Exec(Message, Sender, SenderFirstName, SenderLastName, SenderID)
 	if err != nil {
 		return err
 	}
