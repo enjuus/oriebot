@@ -19,21 +19,23 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 	if m.ReplyTo != nil {
 		err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName, m.ReplyTo.Sender.ID)
 		if err != nil {
-			log.Panic(err)
+			return
 		}
 		_, err = env.bot.Send(m.Chat, "Added quote!")
 		if err != nil {
-			log.Panic(err)
+			return
 		}
 	} else {
 		ID := strings.Replace(m.Text, "/quote ", "", 1)
 		if ID != "/quote" && ID != "all" {
 			quote, err := env.db.GetQuote(ID)
+			fmt.Printf("%v\n", err)
 			if err != nil {
 				_, err = env.bot.Send(m.Chat, "That quote doesn't exist")
 				if err != nil {
-					log.Panic(err)
+					return
 				}
+				return
 			}
 			str := fmt.Sprintf("*%s* \n\n- _%s_", quote.Message, quote.Sender)
 			_, err = env.bot.Send(m.Chat, str, tb.ParseMode("Markdown"))
@@ -45,8 +47,9 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 			if err != nil {
 				_, err = env.bot.Send(m.Chat, "There are no quotes")
 				if err != nil {
-					log.Panic(err)
+					return
 				}
+				return
 			}
 			var str bytes.Buffer
 			for _, qt := range quotes {
@@ -55,7 +58,7 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 			}
 			_, err = env.bot.Send(m.Sender, str.String(), tb.ParseMode("Markdown"))
 			if err != nil {
-				log.Panic(err)
+				return
 			}
 		}
 	}

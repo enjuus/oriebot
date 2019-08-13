@@ -5,7 +5,7 @@ import (
 	"github.com/enjuus/oriebot/models"
 	"log"
 	"time"
-
+	"github.com/joshbetz/config"
 	tb "github.com/tucnak/telebot"
 )
 
@@ -14,9 +14,14 @@ type Env struct {
 	bot  *tb.Bot
 }
 
+var TGToken string
+
 func main() {
+	c := config.New(".config.json")
+	c.Get("TGToken", &TGToken)
+
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "",
+		Token:  TGToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
