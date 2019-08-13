@@ -3,23 +3,19 @@ package main
 import (
 	"fmt"
 	"github.com/enjuus/oriebot/models"
+	tb "github.com/tucnak/telebot"
 	"log"
 	"time"
-	"github.com/joshbetz/config"
-	tb "github.com/tucnak/telebot"
 )
 
 type Env struct {
-	db models.Datastore
-	bot  *tb.Bot
+	db           models.Datastore
+	bot          *tb.Bot
+	LastFMAPIKey string
+	LastFMSecret string
 }
 
-var TGToken string
-
 func main() {
-	c := config.New(".config.json")
-	c.Get("TGToken", &TGToken)
-
 	b, err := tb.NewBot(tb.Settings{
 		Token:  TGToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
@@ -29,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db, b}
+	env := &Env{db, b, LastFMAPIKey, LastFMSecret}
 
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +36,7 @@ func main() {
 
 	b.Handle("/chat", env.HandleChatID)
 	b.Handle("/quote", env.HandleQuotes)
+	b.Handle("/lastfm", env.HandleLastFM)
 
 	b.Start()
 }

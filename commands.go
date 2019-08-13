@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
 	"log"
 	"strings"
@@ -60,6 +61,39 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 			if err != nil {
 				return
 			}
+		}
+	}
+}
+
+func (env *Env) HandleLastFM(m *tb.Message) {
+	user := strings.Replace(m.Text, "/lastfm ", "", 1)
+	if user != "/lastfm" && user != "" {
+		var output bytes.Buffer
+		lfm := lastfm.New(env.LastFMAPIKey, env.LastFMSecret)
+		response, err := lfm.User.GetRecentTracks(user, 0, 0, 0, 0)
+		if err != nil {
+			fmt.Println("Error:")
+			fmt.Println(err)
+			return
+		}
+		track := response.RecentTracks[0]
+		if track.NowPlaying != "" {
+			string := fmt.Sprintf("*Now playing*\n")
+			output.WriteString(string)
+		}
+		string := fmt.Sprintf("%s - _%s_\n", track.Artist.Name, track.Name)
+		output.WriteString(string)
+
+		string = fmt.Sprintf("[​](%s)", track.Image[2].URL)
+		output.WriteString(string)
+		_, err = env.bot.Send(m.Chat, output.String(), tb.ParseMode("Markdown"))
+		if err != nil {
+			return
+		}
+	} else {
+		_, err := env.bot.Send(m.Chat, "Please specify a lastfm user")
+		if err != nil {
+			return
 		}
 	}
 }

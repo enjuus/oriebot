@@ -1,3 +1,4 @@
 bot.db
 .idea/
 .config.json
+config.go
