@@ -1,11 +1,14 @@
 package models
 
+import "log"
+
 type Quote struct {
 	ID              int32
 	Message         string
 	Sender          string
 	SenderFirstName string
 	SenderLastName  string
+	SenderID	int
 }
 
 func (db *DB) CountQuotes() int {
@@ -29,7 +32,7 @@ func (db *DB) AllQuotes() ([]*Quote, error) {
 	quotes := make([]*Quote, 0)
 	for rows.Next() {
 		qt := new(Quote)
-		err := rows.Scan(&qt.ID, &qt.Message, &qt.Sender, &qt.SenderFirstName, &qt.SenderLastName)
+		err := rows.Scan(&qt.ID, &qt.Sender, &qt.SenderFirstName, &qt.SenderLastName, &qt.SenderID, &qt.Message)
 		if err != nil {
 			return nil, err
 		}
@@ -44,9 +47,10 @@ func (db *DB) AllQuotes() ([]*Quote, error) {
 
 func (db *DB) GetQuote(ID string) (*Quote, error) {
 	qt := new(Quote)
-	r := db.QueryRow("SELECT * FROM quotes WHERE ID = ?", ID)
-	err := r.Scan(&qt.ID, &qt.Message, &qt.Sender, &qt.SenderFirstName, &qt.SenderLastName)
+	r := db.QueryRow("SELECT ID, Message, Sender, SenderFirstName, SenderLastName, SenderID FROM quotes WHERE ID = ?", ID)
+	err := r.Scan(&qt.ID, &qt.Message, &qt.Sender, &qt.SenderFirstName, &qt.SenderLastName, &qt.SenderID)
 	if err != nil {
+		log.Panic(err)
 		return nil, err
 	}
 

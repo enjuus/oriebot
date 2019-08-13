@@ -32,6 +32,10 @@ func main() {
 		return
 	}
 
+	b.Handle("/chatid", func(m *tb.Message) {
+		b.Send(m.Chat, fmt.Sprintf("ChatID: %d", m.Chat.ID))
+	})
+
 	b.Handle("/quote", func(m *tb.Message) {
 		if m.ReplyTo != nil {
 			err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName, m.ReplyTo.Sender.ID)
@@ -46,7 +50,6 @@ func main() {
 				if err != nil {
 					b.Send(m.Chat, "That quote doesn't exist")
 				}
-
 				str := fmt.Sprintf("*%s* \n\n- _%s_", quote.Message, quote.Sender)
 				b.Send(m.Chat, str, tb.ParseMode("Markdown"))
 			} else if ID == "all" {
