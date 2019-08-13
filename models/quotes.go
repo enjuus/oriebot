@@ -1,7 +1,5 @@
 package models
 
-import "log"
-
 type Quote struct {
 	ID              int32
 	Message         string
@@ -50,7 +48,6 @@ func (db *DB) GetQuote(ID string) (*Quote, error) {
 	r := db.QueryRow("SELECT ID, Message, Sender, SenderFirstName, SenderLastName, SenderID FROM quotes WHERE ID = ?", ID)
 	err := r.Scan(&qt.ID, &qt.Message, &qt.Sender, &qt.SenderFirstName, &qt.SenderLastName, &qt.SenderID)
 	if err != nil {
-		log.Panic(err)
 		return nil, err
 	}
 

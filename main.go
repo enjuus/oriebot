@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/enjuus/oriebot/models"
 	"log"
-	"strings"
 	"time"
 
 	tb "github.com/tucnak/telebot"
@@ -13,6 +11,7 @@ import (
 
 type Env struct {
 	db models.Datastore
+	bot  *tb.Bot
 }
 
 func main() {
@@ -25,47 +24,17 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db}
+	env := &Env{db, b}
 
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	b.Handle("/chatid", func(m *tb.Message) {
-		b.Send(m.Chat, fmt.Sprintf("ChatID: %d", m.Chat.ID))
-	})
+	fmt.Println("running")
 
-	b.Handle("/quote", func(m *tb.Message) {
-		if m.ReplyTo != nil {
-			err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName, m.ReplyTo.Sender.ID)
-			if err != nil {
-				log.Panic(err)
-			}
-			b.Send(m.Chat, "Added quote!")
-		} else {
-			ID := strings.Replace(m.Text, "/quote ", "", 1)
-			if ID != "/quote" && ID != "all" {
-				quote, err := env.db.GetQuote(ID)
-				if err != nil {
-					b.Send(m.Chat, "That quote doesn't exist")
-				}
-				str := fmt.Sprintf("*%s* \n\n- _%s_", quote.Message, quote.Sender)
-				b.Send(m.Chat, str, tb.ParseMode("Markdown"))
-			} else if ID == "all" {
-				quotes,err := env.db.AllQuotes()
-				if err != nil {
-					b.Send(m.Chat, "There are no quotes")
-				}
-				var str bytes.Buffer
-				for _, qt := range quotes {
-					quote := fmt.Sprintf("%d: *%s* - _%s_\n", qt.ID, qt.Message, qt.Sender)
-					str.WriteString(quote)
-				}
-				b.Send(m.Sender, str.String(), tb.ParseMode("Markdown"))
-			}
-		}
-	})
+	b.Handle("/chat", env.HandleChatID)
+	b.Handle("/quote", env.HandleQuotes)
 
 	b.Start()
 }
