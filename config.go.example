@@ -3,3 +3,4 @@ package main
 var TGToken = ""
 var LastFMAPIKey = ""
 var LastFMSecret = ""
+var OpenWeatherAPI = ""

@@ -9,10 +9,11 @@ import (
 )
 
 type Env struct {
-	db           models.Datastore
-	bot          *tb.Bot
-	LastFMAPIKey string
-	LastFMSecret string
+	db             models.Datastore
+	bot            *tb.Bot
+	LastFMAPIKey   string
+	LastFMSecret   string
+	OpenWeatherAPI string
 }
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db, b, LastFMAPIKey, LastFMSecret}
+	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI}
 
 	if err != nil {
 		log.Fatal(err)
@@ -37,6 +38,7 @@ func main() {
 	b.Handle("/chat", env.HandleChatID)
 	b.Handle("/quote", env.HandleQuotes)
 	b.Handle("/lastfm", env.HandleLastFM)
+	b.Handle("/weather", env.HandleWeather)
 
 	b.Start()
 }

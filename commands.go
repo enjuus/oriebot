@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/briandowns/openweathermap"
 	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
 	"log"
@@ -115,4 +116,33 @@ func (env *Env) HandleLastFM(m *tb.Message) {
 			return
 		}
 	}
+}
+
+func (env *Env) HandleWeather(m *tb.Message) {
+	addr := strings.Replace(m.Text, "/weather ", "", 1)
+	if addr == "/weather" || addr == "" {
+		_, err := env.bot.Send(m.Chat, "Please specify a city/country/address")
+		if err != nil {
+			return
+		}
+	}
+	w, err := openweathermap.NewCurrent("C", "EN", env.OpenWeatherAPI)
+	if err != nil {
+		_, err = env.bot.Send(m.Chat, fmt.Sprintf("Error: %s", err))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	err = w.CurrentByName(addr)
+	if err != nil {
+		_, err = env.bot.Send(m.Chat, fmt.Sprintf("Error: %s", err))
+	}
+	wtr := fmt.Sprintf("*%s, %s*\n%.2f°C, %s", w.Name, w.Sys.Country, w.Main.Temp, w.Weather[0].Main)
+	_, err = env.bot.Send(m.Chat, wtr, tb.ParseMode("Markdown"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 }
