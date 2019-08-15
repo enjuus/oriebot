@@ -68,12 +68,31 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 func (env *Env) HandleLastFM(m *tb.Message) {
 	user := strings.Replace(m.Text, "/lastfm ", "", 1)
 	if user != "/lastfm" && user != "" {
+		lf, err := env.db.GetLastFM(m.Sender.ID)
+		if err == nil {
+			fmt.Println(err)
+		}
+		if lf == nil {
+			err := env.db.AddLastFM(m.Sender.ID, user)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else if lf.LastfmName != user {
+			err := env.db.UpdateLastFM(m.Sender.ID, user)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+	}
+	lf, _ := env.db.GetLastFM(m.Sender.ID)
+	if lf != nil {
 		var output bytes.Buffer
 		lfm := lastfm.New(env.LastFMAPIKey, env.LastFMSecret)
-		response, err := lfm.User.GetRecentTracks(user, 0, 0, 0, 0)
+		response, err := lfm.User.GetRecentTracks(lf.LastfmName, 0, 0, 0, 0)
 		if err != nil {
-			fmt.Println("Error:")
-			fmt.Println(err)
+			_, err = env.bot.Send(m.Chat, fmt.Sprintf("Error: %s", err))
 			return
 		}
 		track := response.RecentTracks[0]

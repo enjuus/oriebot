@@ -10,6 +10,9 @@ type Datastore interface {
 	AddQuote(Message string, Sender string, SenderFirstName string, SenderLastName string, SenderID int) error
 	GetQuote(ID string) (*Quote, error)
 	CountQuotes() int
+	GetLastFM(UserID int) (*LastFMUser, error)
+	AddLastFM(UserID int, LastfmName string) error
+	UpdateLastFM(UserID int, LastfmName string) error
 }
 
 type DB struct {

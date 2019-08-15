@@ -6,7 +6,7 @@ type Quote struct {
 	Sender          string
 	SenderFirstName string
 	SenderLastName  string
-	SenderID	int
+	SenderID        int
 }
 
 func (db *DB) CountQuotes() int {
