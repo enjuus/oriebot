@@ -39,6 +39,7 @@ func main() {
 	b.Handle("/quote", env.HandleQuotes)
 	b.Handle("/lastfm", env.HandleLastFM)
 	b.Handle("/weather", env.HandleWeather)
-
+	b.Handle("/uwu", env.HandleUWU)
+	b.Handle("/spurdo", env.HandleSpurdo)
 	b.Start()
 }

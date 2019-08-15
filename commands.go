@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/briandowns/openweathermap"
+	"github.com/enjuus/uwu"
+	"github.com/enjuus/spurdo"
 	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
 	"log"
@@ -146,3 +148,32 @@ func (env *Env) HandleWeather(m *tb.Message) {
 	}
 
 }
+
+func (env *Env) HandleUWU(m *tb.Message) {
+	var text string
+	if m.ReplyTo != nil {
+		text = m.ReplyTo.Text
+	} else {
+		text = strings.Replace(m.Text, "/uwu ", "", 1)
+	}
+	str, err := uwu.Translate(text)
+	if err != nil {
+		str = "Message can't be empty"
+	}
+	_, err = env.bot.Send(m.Chat, str)
+}
+
+func (env *Env) HandleSpurdo(m *tb.Message) {
+	var text string
+	if m.ReplyTo != nil {
+		text = m.ReplyTo.Text
+	} else {
+		text = strings.Replace(m.Text, "/spurdo ", "", 1)
+	}
+	str, err := spurdo.Translate(text)
+	if err != nil {
+		str = "Message can't be empty"
+	}
+	_, err = env.bot.Send(m.Chat, str)
+}
+
