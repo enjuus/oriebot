@@ -41,5 +41,6 @@ func main() {
 	b.Handle("/weather", env.HandleWeather)
 	b.Handle("/uwu", env.HandleUWU)
 	b.Handle("/spurdo", env.HandleSpurdo)
+	b.Handle("/blog", env.HandleBlog)
 	b.Start()
 }

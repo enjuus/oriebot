@@ -177,3 +177,9 @@ func (env *Env) HandleSpurdo(m *tb.Message) {
 	_, err = env.bot.Send(m.Chat, str)
 }
 
+func (env *Env) HandleBlog(m *tb.Message) {
+	_, err := env.bot.Send(m.Chat, "Nobody fucking cares, dude")
+	if err != nil {
+		return
+	}
+}
