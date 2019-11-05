@@ -8,6 +8,7 @@ import (
 	"github.com/enjuus/spurdo"
 	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
+  "github.com/dafanasev/go-yandex-translate"
 	"log"
 	"strings"
 )
@@ -182,4 +183,20 @@ func (env *Env) HandleBlog(m *tb.Message) {
 	if err != nil {
 		return
 	}
+}
+
+func (env *Env) HandleTranslate(m *tb.Message) {
+  var text string
+  tr := translate.New(env.YandexAPI)
+	if m.ReplyTo != nil {
+		text = m.ReplyTo.Text
+	} else {
+		text = strings.Replace(m.Text, "/tl ", "", 1)
+	}
+  translation, err := tr.Translate("en", text)
+  if err != nil {
+    fmt.Println(err)
+  } else {
+    _, _ = env.bot.Send(m.Chat, translation.Result())
+  }
 }

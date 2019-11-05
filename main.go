@@ -14,6 +14,7 @@ type Env struct {
 	LastFMAPIKey   string
 	LastFMSecret   string
 	OpenWeatherAPI string
+  YandexAPI      string
 }
 
 func main() {
@@ -26,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI}
+	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI, YandexAPI}
 
 	if err != nil {
 		log.Fatal(err)
@@ -42,5 +43,6 @@ func main() {
 	b.Handle("/uwu", env.HandleUWU)
 	b.Handle("/spurdo", env.HandleSpurdo)
 	b.Handle("/blog", env.HandleBlog)
+  b.Handle("/tl", env.HandleTranslate)
 	b.Start()
 }
