@@ -92,7 +92,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 			env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 		}
 		defer resp.Body.Close()
-		path := "./npimg/" + path.Base(element.Image[3].URL)
+		path := "/tmp/" + path.Base(element.Image[3].URL)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			file, _ := os.Create(path)
 			defer file.Close()
