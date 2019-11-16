@@ -76,7 +76,8 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
-	folder, _ := os.UserHomeDir + "/npimg/"
+	folder, _ := os.UserHomeDir
+	folder = folder + "/npimg/"
 	if lf == nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("No User set, set it with /lastfm"))
 		return
