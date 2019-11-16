@@ -14,7 +14,7 @@ type Env struct {
 	LastFMAPIKey   string
 	LastFMSecret   string
 	OpenWeatherAPI string
-  YandexAPI      string
+	YandexAPI      string
 }
 
 func main() {
@@ -39,10 +39,11 @@ func main() {
 	b.Handle("/chat", env.HandleChatID)
 	b.Handle("/quote", env.HandleQuotes)
 	b.Handle("/lastfm", env.HandleLastFM)
+	b.Handle("/topalbums", env.HandleLastFMTopAlbums)
 	b.Handle("/weather", env.HandleWeather)
 	b.Handle("/uwu", env.HandleUWU)
 	b.Handle("/spurdo", env.HandleSpurdo)
 	b.Handle("/blog", env.HandleBlog)
-  b.Handle("/tl", env.HandleTranslate)
+	b.Handle("/tl", env.HandleTranslate)
 	b.Start()
 }

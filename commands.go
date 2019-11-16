@@ -4,12 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/briandowns/openweathermap"
-	"github.com/enjuus/uwu"
+	"github.com/dafanasev/go-yandex-translate"
+	"github.com/enjuus/go-collage"
 	"github.com/enjuus/spurdo"
+	"github.com/enjuus/uwu"
 	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
-  "github.com/dafanasev/go-yandex-translate"
+	"io"
 	"log"
+	"net/http"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -69,6 +74,49 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 	}
 }
 
+func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
+	lf, err := env.db.GetLastFM(m.Sender.ID)
+	if lf == nil {
+		env.bot.Send(m.Chat, fmt.Sprintf("No User set, set it with /lastfm"))
+		return
+	}
+	lfm := lastfm.New(env.LastFMAPIKey, env.LastFMSecret)
+	response, err := lfm.User.GetTopAlbums(lf.LastfmName, "3month", 0, 9)
+	if err != nil {
+		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
+	}
+	images := make(map[int]string)
+	for i, element := range response.TopAlbums {
+		resp, err := http.Get(element.Image[3].URL)
+		if err != nil {
+			env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
+		}
+		defer resp.Body.Close()
+		path := "./npimg/" + path.Base(element.Image[3].URL)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			file, _ := os.Create(path)
+			defer file.Close()
+			io.Copy(file, resp.Body)
+		}
+		images[i] = path
+	}
+
+	files, err := collage.MapImages(images)
+	if err != nil {
+		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
+	}
+	err = collage.MakeNewCollage(files, "./npimg/collage.jpg", 100)
+	if err != nil {
+		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
+	}
+
+	photo := &tb.Photo{File: tb.FromDisk("./npimg/collage.jpg")}
+	env.bot.Send(m.Chat, photo)
+	os.RemoveAll("./npimg/")
+	os.MkdirAll("./npimg/", 0777)
+
+}
+
 func (env *Env) HandleLastFM(m *tb.Message) {
 	user := strings.Replace(m.Text, "/lastfm ", "", 1)
 	if user != "/lastfm" && user != "" {
@@ -79,7 +127,7 @@ func (env *Env) HandleLastFM(m *tb.Message) {
 		if lf == nil {
 			err := env.db.AddLastFM(m.Sender.ID, user)
 			if err != nil {
-				fmt.Println(err)
+				env.bot.Send(m.Chat, fmt.Sprintf("No User set, set it with /lastfm"))
 				return
 			}
 		} else if lf.LastfmName != user {
@@ -186,17 +234,17 @@ func (env *Env) HandleBlog(m *tb.Message) {
 }
 
 func (env *Env) HandleTranslate(m *tb.Message) {
-  var text string
-  tr := translate.New(env.YandexAPI)
+	var text string
+	tr := translate.New(env.YandexAPI)
 	if m.ReplyTo != nil {
 		text = m.ReplyTo.Text
 	} else {
 		text = strings.Replace(m.Text, "/tl ", "", 1)
 	}
-  translation, err := tr.Translate("en", text)
-  if err != nil {
-    fmt.Println(err)
-  } else {
-    _, _ = env.bot.Send(m.Chat, translation.Result())
-  }
+	translation, err := tr.Translate("en", text)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		_, _ = env.bot.Send(m.Chat, translation.Result())
+	}
 }
