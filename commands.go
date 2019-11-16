@@ -92,7 +92,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 			env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 		}
 		defer resp.Body.Close()
-		path := "/tmp/" + path.Base(element.Image[3].URL)
+		path := os.UserHomeDir() + "/npimg/" + path.Base(element.Image[3].URL)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			file, _ := os.Create(path)
 			defer file.Close()
@@ -105,13 +105,15 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
-	err = collage.MakeNewCollage(files, "/tmp/collage.jpg", 100)
+	err = collage.MakeNewCollage(files, os.UserHomeDir()+"/npimg/collage.jpg", 100)
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
 
-	photo := &tb.Photo{File: tb.FromDisk("/tmp/collage.jpg")}
+	photo := &tb.Photo{File: tb.FromDisk(op.UserHomeDir() + "/npimg/collage.jpg")}
 	env.bot.Send(m.Chat, photo)
+	os.RemoveAll(os.UserHomeDir() + "/npimg/")
+	os.MkdirAll(os.UserHomeDir()+"/npimg/", os.ModePerm)
 
 }
 
