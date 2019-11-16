@@ -76,6 +76,7 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
+	folder, _ := os.UserHomeDir + "/npimg/"
 	if lf == nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("No User set, set it with /lastfm"))
 		return
@@ -92,7 +93,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 			env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 		}
 		defer resp.Body.Close()
-		path := os.UserHomeDir() + "/npimg/" + path.Base(element.Image[3].URL)
+		path := folder + path.Base(element.Image[3].URL)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			file, _ := os.Create(path)
 			defer file.Close()
@@ -105,15 +106,15 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
-	err = collage.MakeNewCollage(files, os.UserHomeDir()+"/npimg/collage.jpg", 100)
+	err = collage.MakeNewCollage(files, folder+"/collage.jpg", 100)
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
 
-	photo := &tb.Photo{File: tb.FromDisk(op.UserHomeDir() + "/npimg/collage.jpg")}
+	photo := &tb.Photo{File: tb.FromDisk(folder + "/collage.jpg")}
 	env.bot.Send(m.Chat, photo)
-	os.RemoveAll(os.UserHomeDir() + "/npimg/")
-	os.MkdirAll(os.UserHomeDir()+"/npimg/", os.ModePerm)
+	os.RemoveAll(folder)
+	os.MkdirAll(folder, os.ModePerm)
 
 }
 
