@@ -76,7 +76,7 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
-	folder, err := os.UserHomeDir
+	folder, err := os.UserHomeDir()
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
