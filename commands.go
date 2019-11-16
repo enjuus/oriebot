@@ -105,15 +105,13 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
-	err = collage.MakeNewCollage(files, "./npimg/collage.jpg", 100)
+	err = collage.MakeNewCollage(files, "/tmp/collage.jpg", 100)
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
 
-	photo := &tb.Photo{File: tb.FromDisk("./npimg/collage.jpg")}
+	photo := &tb.Photo{File: tb.FromDisk("/tmp/collage.jpg")}
 	env.bot.Send(m.Chat, photo)
-	os.RemoveAll("./npimg/")
-	os.MkdirAll("./npimg/", 0777)
 
 }
 
