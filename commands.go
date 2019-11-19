@@ -3,6 +3,15 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"log"
+	"math/rand"
+	"net/http"
+	"os"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/briandowns/openweathermap"
 	"github.com/dafanasev/go-yandex-translate"
 	"github.com/enjuus/go-collage"
@@ -10,14 +19,9 @@ import (
 	"github.com/enjuus/uwu"
 	"github.com/ndyakov/go-lastfm"
 	tb "github.com/tucnak/telebot"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"path"
-	"strings"
 )
 
+// HandleChatID returns the senders ChatID / GroupID
 func (env *Env) HandleChatID(m *tb.Message) {
 	_, err := env.bot.Send(m.Chat, fmt.Sprintf("ChatID: %d", m.Chat.ID))
 	if err != nil {
@@ -25,6 +29,7 @@ func (env *Env) HandleChatID(m *tb.Message) {
 	}
 }
 
+// HandleQuotes stores and retrieves quotes from the database
 func (env *Env) HandleQuotes(m *tb.Message) {
 	if m.ReplyTo != nil {
 		err := env.db.AddQuote(m.ReplyTo.Text, m.ReplyTo.Sender.Username, m.ReplyTo.Sender.FirstName, m.ReplyTo.Sender.LastName, m.ReplyTo.Sender.ID)
@@ -74,6 +79,7 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 	}
 }
 
+// HandleLastFMTopAlbums generates a collage of the top albums of the requested last.fm user
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
 	folder, err := os.UserHomeDir()
@@ -122,6 +128,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 
 }
 
+// HandleLastFM stores a new last.fm name for a TG ID and returns the current/last played song
 func (env *Env) HandleLastFM(m *tb.Message) {
 	user := strings.Replace(m.Text, "/lastfm ", "", 1)
 	if user != "/lastfm" && user != "" {
@@ -174,6 +181,8 @@ func (env *Env) HandleLastFM(m *tb.Message) {
 	}
 }
 
+// HandleWeather pulls current weather data from the OpenWeatherAPI
+// And outputs it back ot the chat
 func (env *Env) HandleWeather(m *tb.Message) {
 	addr := strings.Replace(m.Text, "/weather ", "", 1)
 	if addr == "/weather" || addr == "" {
@@ -203,6 +212,7 @@ func (env *Env) HandleWeather(m *tb.Message) {
 
 }
 
+// HandleUWU "translates" a text into uwu
 func (env *Env) HandleUWU(m *tb.Message) {
 	var text string
 	if m.ReplyTo != nil {
@@ -217,6 +227,7 @@ func (env *Env) HandleUWU(m *tb.Message) {
 	_, err = env.bot.Send(m.Chat, str)
 }
 
+// HandleSpurdo "translates" a text into spurdo
 func (env *Env) HandleSpurdo(m *tb.Message) {
 	var text string
 	if m.ReplyTo != nil {
@@ -231,6 +242,7 @@ func (env *Env) HandleSpurdo(m *tb.Message) {
 	_, err = env.bot.Send(m.Chat, str)
 }
 
+// HandleBlog is being rude
 func (env *Env) HandleBlog(m *tb.Message) {
 	_, err := env.bot.Send(m.Chat, "Nobody fucking cares, dude")
 	if err != nil {
@@ -238,6 +250,7 @@ func (env *Env) HandleBlog(m *tb.Message) {
 	}
 }
 
+// HandleTranslate uses YandexAPI to translate text to english
 func (env *Env) HandleTranslate(m *tb.Message) {
 	var text string
 	tr := translate.New(env.YandexAPI)
@@ -252,4 +265,18 @@ func (env *Env) HandleTranslate(m *tb.Message) {
 	} else {
 		_, _ = env.bot.Send(m.Chat, translation.Result())
 	}
+}
+
+// HandleDecide takes a string input and helps you decide
+func (env *Env) HandleDecide(m *tb.Message) {
+	var text string
+	if m.ReplyTo != nil {
+		text = m.ReplyTo.Text
+	} else {
+		text = strings.Replace(m.Text, "/decide ", "", 1)
+	}
+	split := strings.Split(text, " or ")
+	rand.Seed(time.Now().Unix())
+	str := fmt.Sprint("", split[rand.Intn(len(split))])
+	env.bot.Send(m.Chat, str)
 }

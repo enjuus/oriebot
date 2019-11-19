@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/enjuus/oriebot/models"
-	tb "github.com/tucnak/telebot"
 	"log"
 	"time"
+
+	"github.com/enjuus/oriebot/models"
+	tb "github.com/tucnak/telebot"
 )
 
+// Env is the main struct being passed ot all commands
 type Env struct {
 	db             models.Datastore
 	bot            *tb.Bot
@@ -45,5 +47,6 @@ func main() {
 	b.Handle("/spurdo", env.HandleSpurdo)
 	b.Handle("/blog", env.HandleBlog)
 	b.Handle("/tl", env.HandleTranslate)
+	b.Handle("/decide", env.HandleDecide)
 	b.Start()
 }
