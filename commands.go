@@ -82,11 +82,11 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 // HandleLastFMTopAlbums generates a collage of the top albums of the requested last.fm user
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
-	folder, err := os.UserHomeDir()
+	baseDir, err := os.UserHomeDir()
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
-	folder = folder + "/npimg/"
+	folder := baseDir + "/npimg/"
 	if lf == nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("No User set, set it with /lastfm"))
 		return
@@ -99,17 +99,17 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	images := make(map[int]string)
 	for i, element := range response.TopAlbums {
 		resp, err := http.Get(element.Image[3].URL)
-		if err != nil {
-			env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
+		if err == nil {
+			defer resp.Body.Close()
+			images[i] = folder + path.Base(element.Image[3].URL)
+			if _, err := os.Stat(images[i]); os.IsNotExist(err) {
+				file, _ := os.Create(images[i])
+				defer file.Close()
+				io.Copy(file, resp.Body)
+			}
+		} else {
+			images[i] = baseDir + "/standin.jpg"
 		}
-		defer resp.Body.Close()
-		path := folder + path.Base(element.Image[3].URL)
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			file, _ := os.Create(path)
-			defer file.Close()
-			io.Copy(file, resp.Body)
-		}
-		images[i] = path
 	}
 
 	files, err := collage.MapImages(images)
