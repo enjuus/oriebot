@@ -29,6 +29,23 @@ func (env *Env) HandleChatID(m *tb.Message) {
 	}
 }
 
+func (env *Env) HandleCommandAddr(command string, text string) string {
+	if strings.Contains(text, "@oriebot") {
+		command = command + "@oriebot"
+	}
+	addr := strings.Replace(text, command, "", 1)
+	return addr
+}
+
+func (env *Env) CheckOptions(arr [6]string, str string) bool {
+	for _, a := range arr {
+		if a == str {
+			return true
+		}
+	}
+	return false
+}
+
 // HandleQuotes stores and retrieves quotes from the database
 func (env *Env) HandleQuotes(m *tb.Message) {
 	if m.ReplyTo != nil {
@@ -41,7 +58,7 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 			return
 		}
 	} else {
-		ID := strings.Replace(m.Text, "/quote ", "", 1)
+		ID := env.HandleCommandAddr("/quote", m.Text)
 		if ID != "/quote" && ID != "all" {
 			quote, err := env.db.GetQuote(ID)
 			fmt.Printf("%v\n", err)
@@ -82,6 +99,11 @@ func (env *Env) HandleQuotes(m *tb.Message) {
 // HandleLastFMTopAlbums generates a collage of the top albums of the requested last.fm user
 func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 	lf, err := env.db.GetLastFM(m.Sender.ID)
+	options := [6]string{"overall", "7day", "1month", "3month", "6month", "12month"}
+	period := env.HandleCommandAddr("/topalbums", m.Text)
+	if env.CheckOptions(options, period) {
+		period = "3month"
+	}
 	baseDir, err := os.UserHomeDir()
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
@@ -92,7 +114,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 		return
 	}
 	lfm := lastfm.New(env.LastFMAPIKey, env.LastFMSecret)
-	response, err := lfm.User.GetTopAlbums(lf.LastfmName, "3month", 0, 9)
+	response, err := lfm.User.GetTopAlbums(lf.LastfmName, period, 0, 9)
 	if err != nil {
 		env.bot.Send(m.Chat, fmt.Sprintf("i pooped and shidded"))
 	}
@@ -130,7 +152,7 @@ func (env *Env) HandleLastFMTopAlbums(m *tb.Message) {
 
 // HandleLastFM stores a new last.fm name for a TG ID and returns the current/last played song
 func (env *Env) HandleLastFM(m *tb.Message) {
-	user := strings.Replace(m.Text, "/lastfm ", "", 1)
+	user := env.HandleCommandAddr("/lastfm", m.Text)
 	if user != "/lastfm" && user != "" {
 		lf, err := env.db.GetLastFM(m.Sender.ID)
 		if err == nil {
@@ -184,7 +206,7 @@ func (env *Env) HandleLastFM(m *tb.Message) {
 // HandleWeather pulls current weather data from the OpenWeatherAPI
 // And outputs it back ot the chat
 func (env *Env) HandleWeather(m *tb.Message) {
-	addr := strings.Replace(m.Text, "/weather ", "", 1)
+	addr := env.HandleCommandAddr("/weather", m.Text)
 	if addr == "/weather" || addr == "" {
 		_, err := env.bot.Send(m.Chat, "Please specify a city/country/address")
 		if err != nil {
@@ -218,7 +240,7 @@ func (env *Env) HandleUWU(m *tb.Message) {
 	if m.ReplyTo != nil {
 		text = m.ReplyTo.Text
 	} else {
-		text = strings.Replace(m.Text, "/uwu ", "", 1)
+		text = env.HandleCommandAddr("/uwu", m.Text)
 	}
 	str, err := uwu.Translate(text)
 	if err != nil {
@@ -233,7 +255,7 @@ func (env *Env) HandleSpurdo(m *tb.Message) {
 	if m.ReplyTo != nil {
 		text = m.ReplyTo.Text
 	} else {
-		text = strings.Replace(m.Text, "/spurdo ", "", 1)
+		text = env.HandleCommandAddr("/spurdo", m.Text)
 	}
 	str, err := spurdo.Translate(text)
 	if err != nil {
@@ -257,7 +279,7 @@ func (env *Env) HandleTranslate(m *tb.Message) {
 	if m.ReplyTo != nil {
 		text = m.ReplyTo.Text
 	} else {
-		text = strings.Replace(m.Text, "/tl ", "", 1)
+		text = env.HandleCommandAddr("/tl", m.Text)
 	}
 	translation, err := tr.Translate("en", text)
 	if err != nil {
@@ -273,7 +295,7 @@ func (env *Env) HandleDecide(m *tb.Message) {
 	if m.ReplyTo != nil {
 		text = m.ReplyTo.Text
 	} else {
-		text = strings.Replace(m.Text, "/decide ", "", 1)
+		text = env.HandleCommandAddr("/decide", m.Text)
 	}
 	split := strings.Split(text, " or ")
 	rand.Seed(time.Now().Unix())
