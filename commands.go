@@ -317,7 +317,7 @@ func (env *Env) HandleTurnips(m *tb.Message) {
 		env.bot.Send(m. Chat, fmt.Sprintf("The price has been added for today [%s]", date))
 	} else {
 		turnips, err := env.db.GetTodaysPrices(date)
-		if err != nil || turnips == nil {
+		if err != nil || len(turnips) == 0 {
 			_, err := env.bot.Send(m.Chat, "No prices yet for today. [" + date+ "]")
 			if err != nil {
 				return
