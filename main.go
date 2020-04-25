@@ -48,5 +48,6 @@ func main() {
 	b.Handle("/blog", env.HandleBlog)
 	b.Handle("/tl", env.HandleTranslate)
 	b.Handle("/decide", env.HandleDecide)
+	b.Handle("/turnips", env.HandleTurnips)
 	b.Start()
 }

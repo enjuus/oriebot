@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -301,4 +302,35 @@ func (env *Env) HandleDecide(m *tb.Message) {
 	rand.Seed(time.Now().Unix())
 	str := fmt.Sprint("", split[rand.Intn(len(split))])
 	env.bot.Send(m.Chat, str)
+}
+
+func (env *Env) HandleTurnips(m *tb.Message) {
+	price := env.HandleCommandAddr("/turnips", m.Text)
+	date := time.Now().Format("2006-01-02")
+	if price != "/turnips" && price != "" {
+		iprice, _ := strconv.Atoi(strings.TrimSpace(price))
+		err := env.db.AddTurnip(int(iprice), m.Sender.ID, m.Sender.Username, date)
+		if err != nil {
+			env.bot.Send(m.Chat, fmt.Sprintf("The price could not be set, yell at enju"))
+			return
+		}
+		env.bot.Send(m. Chat, fmt.Sprintf("The price has been added for today [%s]", date))
+	} else {
+		turnips, err := env.db.GetTodaysPrices(date)
+		if err != nil || turnips == nil {
+			_, err := env.bot.Send(m.Chat, "No prices yet for today. [" + date+ "]")
+			if err != nil {
+				return
+			}
+		}
+		var str bytes.Buffer
+		for _, t := range turnips {
+			turnip := fmt.Sprintf("*%s* - _%d_ \n", t.Name, t.Price)
+			str.WriteString(turnip)
+		}
+		_, err = env.bot.Send(m.Chat, str.String(), tb.ParseMode("Markdown"))
+		if err != nil {
+			return
+		}
+	}
 }
