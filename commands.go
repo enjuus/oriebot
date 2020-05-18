@@ -369,7 +369,7 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 func (env *Env) HandleTerms(m *tb.Message) {
 	term := env.HandleCommandAddr("/terms", m.Text)
 	if term != "/terms" && term != "" {
-		err := env.db.AddTerm(term)
+		err := env.db.AddTerm(strings.ToLower(strings.TrimSpace(term)))
 		if err != nil {
 			return
 		}
@@ -391,7 +391,7 @@ func (env *Env) HandleTerms(m *tb.Message) {
 func (env *Env) HandleTerm(m *tb.Message) {
 	term := env.HandleCommandAddr("/term", m.Text)
 	if term != "/term" && term != "" {
-		te, err := env.db.GetTerm(strings.TrimSpace(term))
+		te, err := env.db.GetTerm(strings.ToLower(strings.TrimSpace(term)))
 		if err != nil {
 			fmt.Println("err empty")
 			return
