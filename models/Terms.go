@@ -70,12 +70,12 @@ func (db *DB) DeleteTerm(Name string) error {
 }
 
 func (db *DB) AddCounter(Name string) error {
-	stmt, err := db.Prepare("UPDATE terms SET `Count` = `Count` + 1")
+	stmt, err := db.Prepare("UPDATE terms SET `Count` = `Count` + 1 WHERE Name = ?")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec()
+	_, err = stmt.Exec(Name)
 	if err != nil {
 		return err
 	}

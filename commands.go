@@ -343,7 +343,7 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 	text := strings.Fields(m.Text)
 	for _, word := range text {
 		for _, t := range terms {
-			if word == t.Name {
+			if strings.ToLower(word) == t.Name {
 				_ = env.db.AddCounter(t.Name)
 				term, err := env.db.GetTerm(t.Name)
 				fmt.Println(t)
