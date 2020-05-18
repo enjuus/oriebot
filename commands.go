@@ -314,11 +314,11 @@ func (env *Env) HandleTurnips(m *tb.Message) {
 			env.bot.Send(m.Chat, fmt.Sprintf("The price could not be set, yell at enju"))
 			return
 		}
-		env.bot.Send(m. Chat, fmt.Sprintf("The price has been added for today [%s]", date))
+		env.bot.Send(m.Chat, fmt.Sprintf("The price has been added for today [%s]", date))
 	} else {
 		turnips, err := env.db.GetTodaysPrices(date)
 		if err != nil || len(turnips) == 0 {
-			_, err := env.bot.Send(m.Chat, "No prices yet for today. [" + date+ "]")
+			_, err := env.bot.Send(m.Chat, "No prices yet for today. ["+date+"]")
 			if err != nil {
 				return
 			}
@@ -344,8 +344,13 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 	for _, word := range text {
 		for _, t := range terms {
 			if word == t.Name {
-				err = env.db.AddCounter(t.Name)
+				_ = env.db.AddCounter(t.Name)
 				term, err := env.db.GetTerm(t.Name)
+				fmt.Println(t)
+				err = env.db.CountForUser(t.ID, m.Sender.Username)
+				if err != nil {
+					fmt.Println("count for user", err)
+				}
 				if err != nil {
 					fmt.Println("hm")
 				}
@@ -374,6 +379,31 @@ func (env *Env) HandleTerms(m *tb.Message) {
 		var str bytes.Buffer
 		for _, t := range terms {
 			term := fmt.Sprintf("*%s* - _%d_ \n", t.Name, t.Count)
+			str.WriteString(term)
+		}
+		_, err = env.bot.Send(m.Chat, str.String(), tb.ParseMode("Markdown"))
+		if err != nil {
+			return
+		}
+	}
+}
+
+func (env *Env) HandleTerm(m *tb.Message) {
+	term := env.HandleCommandAddr("/term", m.Text)
+	if term != "/term" && term != "" {
+		te, err := env.db.GetTerm(strings.TrimSpace(term))
+		if err != nil {
+			fmt.Println("err empty")
+			return
+		}
+		userTerms, err := env.db.GetForUsers(te.ID)
+		if err != nil {
+			fmt.Println(err)
+			_, err = env.bot.Send(m.Chat, "I don't know this term.")
+		}
+		var str bytes.Buffer
+		for _, t := range userTerms {
+			term := fmt.Sprintf("*%s* - _%d_ \n", t.UserID, t.Count)
 			str.WriteString(term)
 		}
 		_, err = env.bot.Send(m.Chat, str.String(), tb.ParseMode("Markdown"))

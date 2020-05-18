@@ -20,6 +20,8 @@ type Datastore interface {
 	AddTerm(Name string) error
 	DeleteTerm(Name string) error
 	AddCounter(Name string) error
+	CountForUser(TermID int, UserID string) error
+	GetForUsers(TermID int) ([]*TermUser, error)
 }
 
 type DB struct {
