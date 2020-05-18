@@ -334,3 +334,51 @@ func (env *Env) HandleTurnips(m *tb.Message) {
 		}
 	}
 }
+
+func (env *Env) HandleTermCount(m *tb.Message) {
+	terms, err := env.db.GetTerms()
+	if err != nil {
+		_, err = env.bot.Send(m.Chat, "Hm.")
+	}
+	text := strings.Fields(m.Text)
+	for _, word := range text {
+		for _, t := range terms {
+			if word == t.Name {
+				err = env.db.AddCounter(t.Name)
+				term, err := env.db.GetTerm(t.Name)
+				if err != nil {
+					fmt.Println("hm")
+				}
+				var prev string
+				for _, c := range fmt.Sprintf("%d", term.Count) {
+					if string(c) == prev {
+						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d", term.Name, term.Count))
+					}
+					prev = string(c)
+				}
+			}
+		}
+	}
+}
+
+func (env *Env) HandleTerms(m *tb.Message) {
+	term := env.HandleCommandAddr("/terms", m.Text)
+	if term != "/terms" && term != "" {
+		err := env.db.AddTerm(term)
+		if err != nil {
+			return
+		}
+		_, err = env.bot.Send(m.Chat, "Added term")
+	} else {
+		terms, err := env.db.GetTerms()
+		var str bytes.Buffer
+		for _, t := range terms {
+			term := fmt.Sprintf("*%s* - _%d_ \n", t.Name, t.Count)
+			str.WriteString(term)
+		}
+		_, err = env.bot.Send(m.Chat, str.String(), tb.ParseMode("Markdown"))
+		if err != nil {
+			return
+		}
+	}
+}

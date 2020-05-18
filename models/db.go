@@ -15,6 +15,11 @@ type Datastore interface {
 	UpdateLastFM(UserID int, LastfmName string) error
 	AddTurnip(Price int, UserID int, Name string, Date string) error
 	GetTodaysPrices(Date string) ([]*Turnip, error)
+	GetTerms() ([]*Term, error)
+	GetTerm(Name string) (*Term, error)
+	AddTerm(Name string) error
+	DeleteTerm(Name string) error
+	AddCounter(Name string) error
 }
 
 type DB struct {

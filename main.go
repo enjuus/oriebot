@@ -38,6 +38,10 @@ func main() {
 
 	fmt.Println("running")
 
+	b.Handle(tb.OnPhoto, func() {
+		fmt.Println("fired")
+	})
+
 	b.Handle("/chat", env.HandleChatID)
 	b.Handle("/quote", env.HandleQuotes)
 	b.Handle("/lastfm", env.HandleLastFM)
@@ -49,5 +53,7 @@ func main() {
 	b.Handle("/tl", env.HandleTranslate)
 	b.Handle("/decide", env.HandleDecide)
 	b.Handle("/turnips", env.HandleTurnips)
+	b.Handle("/terms", env.HandleTerms)
+	b.Handle(tb.OnText, env.HandleTermCount)
 	b.Start()
 }
