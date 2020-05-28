@@ -17,6 +17,7 @@ type Env struct {
 	LastFMSecret   string
 	OpenWeatherAPI string
 	YandexAPI      string
+	ListOfAuth     [2]int64
 }
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI, YandexAPI}
+	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI, YandexAPI, listOfAuth}
 
 	if err != nil {
 		log.Fatal(err)

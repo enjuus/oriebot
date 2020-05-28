@@ -5,3 +5,4 @@ var LastFMAPIKey = ""
 var LastFMSecret = ""
 var OpenWeatherAPI = ""
 var YandexAPI = ""
+var ListOfAuth = [2]int64

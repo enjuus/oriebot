@@ -47,6 +47,21 @@ func (env *Env) CheckOptions(arr [6]string, str string) bool {
 	return false
 }
 
+func (env *Env) Reverse(Input string) string {
+	n := 0
+	rune := make([]rune, len(Input))
+	for _, r := range Input {
+		rune[n] = r
+		n++
+	}
+	rune = rune[0:n]
+	for i := 0; i < n/2; i++ {
+		rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
+	}
+	output := string(rune)
+	return output
+}
+
 // HandleQuotes stores and retrieves quotes from the database
 func (env *Env) HandleQuotes(m *tb.Message) {
 	if m.ReplyTo != nil {
@@ -355,11 +370,13 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 					fmt.Println("hm")
 				}
 				var prev string
-				for _, c := range fmt.Sprintf("%d", term.Count) {
+				for _, c := range env.Reverse(fmt.Sprintf("%d", term.Count)) {
 					if string(c) == prev {
 						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d", term.Name, term.Count))
 					}
-					prev = string(c)
+					if prev == "" {
+						prev = string(c)
+					}
 				}
 			}
 		}
@@ -410,5 +427,13 @@ func (env *Env) HandleTerm(m *tb.Message) {
 		if err != nil {
 			return
 		}
+		for _, x := range env.ListOfAuth {
+			if m.Chat.ID != x {
+				env.bot.Leave(m.Chat)
+			}
+		}
 	}
+}
+
+func (env *Env) DisconnectUnauthorized(m *tb.Message) {
 }
