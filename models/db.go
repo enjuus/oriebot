@@ -22,6 +22,7 @@ type Datastore interface {
 	AddCounter(Name string) error
 	CountForUser(TermID int, UserID string) error
 	GetForUsers(TermID int) ([]*TermUser, error)
+	StoreChatLogID(ChatID int64) error
 }
 
 type DB struct {
@@ -37,4 +38,18 @@ func NewDB(dataSourceName string) (*DB, error) {
 		return nil, err
 	}
 	return &DB{db}, nil
+}
+
+func (db *DB) StoreChatLogID(ChatID int64) error {
+	stmt, err := db.Prepare("INSERT INTO log (`ChatID`) VALUES (?)")
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(ChatID)
+	if err != nil {
+		return err
+	}
+
+	return err
 }

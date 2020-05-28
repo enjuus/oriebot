@@ -427,6 +427,7 @@ func (env *Env) HandleTerm(m *tb.Message) {
 		if err != nil {
 			return
 		}
+		env.db.StoreChatLogID(m.Chat.ID)
 		for _, x := range env.ListOfAuth {
 			if m.Chat.ID != x {
 				env.bot.Leave(m.Chat)
