@@ -375,7 +375,9 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d", term.Name, term.Count))
 						return
 					}
-					prev = string(c)
+					if len(prev) == 0 {
+						prev = string(c)
+					}
 				}
 			}
 		}
