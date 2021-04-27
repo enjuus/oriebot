@@ -123,7 +123,7 @@ func (db *DB) CountForUser(TermID int, UserID string) error {
 func (db *DB) GetForUsers(TermID int) ([]*TermUser, error) {
 	userTerms := make([]*TermUser, 0)
 
-	rows, err := db.Query("SELECT * FROM termuser WHERE TermID = ?", TermID)
+	rows, err := db.Query("SELECT * FROM termuser WHERE TermID = ? ORDER by Count DESC", TermID)
 	if err != nil {
 		return nil, err
 	}

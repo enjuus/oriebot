@@ -373,7 +373,7 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 				count := fmt.Sprintf("%d", term.Count)
 				for _, c := range count[len(count)-2:] {
 					if string(c) == prev {
-						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d", term.Name, term.Count))
+						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d\nnice now remember\n2021 year of helth\nget up and stretch\ndo some exercise, walk a bit", term.Name, term.Count))
 						return
 					}
 					prev = string(c)
@@ -430,7 +430,7 @@ func (env *Env) HandleTerm(m *tb.Message) {
 		env.db.StoreChatLogID(m.Chat.ID)
 		for _, x := range env.ListOfAuth {
 			if m.Chat.ID != x {
-				env.bot.Leave(m.Chat)
+				//env.bot.Leave(m.Chat)
 			}
 		}
 	}
