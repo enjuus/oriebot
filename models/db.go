@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -23,6 +24,10 @@ type Datastore interface {
 	CountForUser(TermID int, UserID string) error
 	GetForUsers(TermID int) ([]*TermUser, error)
 	StoreChatLogID(ChatID int64) error
+	AllUsers() ([]*Helth, error)
+	GetHelth(ID string) (*Helth, error)
+	AddHelth(Sender string, SenderID int) error
+	RemoveHelth(SenderID int) error
 }
 
 type DB struct {

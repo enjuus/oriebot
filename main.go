@@ -18,6 +18,9 @@ type Env struct {
 	OpenWeatherAPI string
 	YandexAPI      string
 	ListOfAuth     [2]int64
+	Ticker         *time.Ticker
+	QuitCall       chan struct{}
+	MainChannel    *tb.Chat
 }
 
 func main() {
@@ -30,7 +33,11 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI, YandexAPI, listOfAuth}
+
+	ticker := time.NewTicker(60 * time.Minute)
+	quit := make(chan struct{})
+
+	env := &Env{db, b, LastFMAPIKey, LastFMSecret, OpenWeatherAPI, YandexAPI, listOfAuth, ticker, quit, &tb.Chat{}}
 
 	if err != nil {
 		log.Fatal(err)
@@ -51,6 +58,11 @@ func main() {
 	b.Handle("/turnips", env.HandleTurnips)
 	b.Handle("/terms", env.HandleTerms)
 	b.Handle("/term", env.HandleTerm)
+	b.Handle("/helth", env.HandleHelth)
+	b.Handle("/unhelth", env.HandleNoMoreHelth)
+	b.Handle("/starthelth", env.HandleStartHelth)
+	b.Handle("/stophelth", env.HandleStopHelth)
 	b.Handle(tb.OnText, env.HandleTermCount)
 	b.Start()
+
 }

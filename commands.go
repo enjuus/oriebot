@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/briandowns/openweathermap"
-	"github.com/dafanasev/go-yandex-translate"
+	translate "github.com/dafanasev/go-yandex-translate"
 	"github.com/enjuus/go-collage"
 	"github.com/enjuus/spurdo"
 	"github.com/enjuus/uwu"
@@ -60,6 +60,58 @@ func (env *Env) Reverse(Input string) string {
 	}
 	output := string(rune)
 	return output
+}
+
+// HandleHelth subscribes a user to the messages
+func (env *Env) HandleHelth(m *tb.Message) {
+	err := env.db.AddHelth(m.Sender.Username, m.Sender.ID)
+	if err != nil {
+		_, err = env.bot.Send(m.Chat, "Cannot subscribe to the year of helth :(")
+		return
+	}
+
+	_, err = env.bot.Send(m.Chat, fmt.Sprintf("Susbcribed @%s to the year of helth", m.Sender.Username))
+}
+
+func (env *Env) HandleNoMoreHelth(m *tb.Message) {
+	err := env.db.RemoveHelth(m.Sender.ID)
+	if err != nil {
+		_, err = env.bot.Send(m.Chat, "Cannot unsubscribe to helth, u have to stay helthy")
+		return
+	}
+	_, err = env.bot.Send(m.Chat, "Succesfully unsubscribed from the year of helth")
+}
+
+func (env *Env) HandleStartHelth(m *tb.Message) {
+	env.MainChannel = m.Chat
+	env.bot.Send(m.Chat, "Successfully started the year of helth")
+	go func() {
+		for {
+			select {
+			case <-env.Ticker.C:
+				if isInTimeRange() {
+					helths, _ := env.db.AllUsers()
+					users := ""
+					for _, helth := range helths {
+						if users == "" {
+							users = fmt.Sprintf("@%s", helth.Sender)
+						} else {
+							users = fmt.Sprintf("%s @%s", users, helth.Sender)
+						}
+					}
+					env.bot.Send(env.MainChannel, fmt.Sprintf("2021 year of helth\nget up and stretch\ndo some exercise\n%s", users))
+				}
+			case <-env.QuitCall:
+				env.Ticker.Stop()
+				return
+			}
+		}
+	}()
+}
+
+func (env *Env) HandleStopHelth(m *tb.Message) {
+	close(env.QuitCall)
+	env.bot.Send(m.Chat, fmt.Sprintf("Stopped the year of helth"))
 }
 
 // HandleQuotes stores and retrieves quotes from the database
@@ -437,4 +489,40 @@ func (env *Env) HandleTerm(m *tb.Message) {
 }
 
 func (env *Env) DisconnectUnauthorized(m *tb.Message) {
+}
+
+func stringToTime(str string) time.Time {
+	tm, err := time.Parse(time.Kitchen, str)
+	if err != nil {
+		fmt.Println("Failed to decode time:", err)
+	}
+	fmt.Println("Time decoded:", tm)
+	return tm
+}
+
+func isInTimeRange() bool {
+
+	startTimeString := "09:00AM" // "01:00PM"
+
+	endTimeString := "09:30PM"
+
+	t := time.Now()
+
+	timeNowString := t.Format(time.Kitchen)
+
+	timeNow := stringToTime(timeNowString)
+
+	start := stringToTime(startTimeString)
+
+	end := stringToTime(endTimeString)
+
+	if timeNow.Before(start) {
+		return false
+	}
+
+	if timeNow.Before(end) {
+		return true
+	}
+
+	return false
 }
