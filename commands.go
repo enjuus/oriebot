@@ -89,17 +89,15 @@ func (env *Env) HandleStartHelth(m *tb.Message) {
 		for {
 			select {
 			case <-env.Ticker.C:
-				if isInTimeRange() {
-					helths, _ := env.db.AllUsers()
-					users := ""
-					for _, helth := range helths {
-						if users == "" {
-							users = fmt.Sprintf("@%s", helth.Sender)
-						} else {
-							users = fmt.Sprintf("%s @%s", users, helth.Sender)
+				helths, _ := env.db.AllUsers()
+				for _, helth := range helths {
+					if isInTimeRange(helth.Start, helth.Stop) {
+						user, err := env.bot.ChatByID(fmt.Sprint(helth.SenderID))
+						if err != nil {
+							fmt.Println("cannot fetch userid")
 						}
+						env.bot.Send(user, fmt.Sprintf("2021 year of helth\nget up and stretch\ndo some exercise"))
 					}
-					env.bot.Send(env.MainChannel, fmt.Sprintf("2021 year of helth\nget up and stretch\ndo some exercise\n%s", users))
 				}
 			case <-env.QuitCall:
 				env.Ticker.Stop()
@@ -425,7 +423,7 @@ func (env *Env) HandleTermCount(m *tb.Message) {
 				count := fmt.Sprintf("%d", term.Count)
 				for _, c := range count[len(count)-2:] {
 					if string(c) == prev {
-						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d\nnice now remember\n2021 year of helth\nget up and stretch\ndo some exercise, walk a bit", term.Name, term.Count))
+						_, err = env.bot.Send(m.Chat, fmt.Sprintf("%s: %d", term.Name, term.Count))
 						return
 					}
 					prev = string(c)
@@ -500,11 +498,11 @@ func stringToTime(str string) time.Time {
 	return tm
 }
 
-func isInTimeRange() bool {
+func isInTimeRange(startingTime string, stoppingTime string) bool {
 
-	startTimeString := "09:00AM" // "01:00PM"
+	startTimeString := startingTime // "06:00AM" // "01:00PM"
 
-	endTimeString := "09:30PM"
+	endTimeString := stoppingTime //"09:30PM"
 
 	t := time.Now()
 

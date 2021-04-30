@@ -4,6 +4,8 @@ type Helth struct {
 	ID       int32
 	Sender   string
 	SenderID int
+	Start    string
+	Stop     string
 }
 
 func (db *DB) AllUsers() ([]*Helth, error) {
@@ -13,7 +15,7 @@ func (db *DB) AllUsers() ([]*Helth, error) {
 	helths := make([]*Helth, 0)
 	for rows.Next() {
 		ht := new(Helth)
-		err := rows.Scan(&ht.ID, &ht.Sender, &ht.SenderID)
+		err := rows.Scan(&ht.ID, &ht.Sender, &ht.SenderID, &ht.Start, &ht.Stop)
 		if err != nil {
 			return nil, err
 		}
@@ -28,8 +30,8 @@ func (db *DB) AllUsers() ([]*Helth, error) {
 
 func (db *DB) GetHelth(ID string) (*Helth, error) {
 	ht := new(Helth)
-	r := db.QueryRow("SELECT ID, Sender, SenderID FROM helth WHERE ID = ?", ID)
-	err := r.Scan(&ht.ID, &ht.Sender, &ht.SenderID)
+	r := db.QueryRow("SELECT ID, Sender, SenderID, Start, Stop FROM helth WHERE ID = ?", ID)
+	err := r.Scan(&ht.ID, &ht.Sender, &ht.SenderID, &ht.Start, &ht.Stop)
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +40,12 @@ func (db *DB) GetHelth(ID string) (*Helth, error) {
 }
 
 func (db *DB) AddHelth(Sender string, SenderID int) error {
-	stmt, err := db.Prepare("INSERT INTO helth (Sender, SenderID) values (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO helth (Sender, SenderID, Start, Stop) values (?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(Sender, SenderID)
+	_, err = stmt.Exec(Sender, SenderID, "07:00AM", "06:30PM")
 	if err != nil {
 		return err
 	}
